@@ -7,7 +7,7 @@ def create_snapshot(instance_id, description):
     volumes = ec2.describe_instances(InstanceIds=[instance_id])
 
     for reservation in volumes['Reservations']:
-        for instance in reservation['instance']:
+        for instance in reservation['Instances']:
             for device in instance['BlockDeviceMappings']:
                 volume_id = device['Ebs']['VolumeId']
                 print(f"Creating snapshot for volume: {volume_id}")
@@ -21,13 +21,13 @@ def get_backup_instances(tag_key='backup', tag_value='true'):
     ec2 = boto3.client('ec2')
     response = ec2.describe_instances(
         Filters=[
-            {'Name': f'tag:[tag_key]', 'Values': [tag_value]},
+            {'Name': f'tag:{tag_key}', 'Values': [tag_value]},
             {'Name': 'instance-state-name', 'Values': ['running']}
         ]
     )
     instances = []
     for reservation in response['Reservations']:
-        for instance in reservation['instances']:
+        for instance in reservation['Instances']:
             instances.append(instance['InstanceId'])
     return instances
 
